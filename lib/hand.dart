@@ -1,3 +1,9 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public 
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 import 'tile.dart';
 import 'dart:collection';
 
@@ -14,11 +20,11 @@ class Hand<Tile> extends ListBase<Tile> {
     innerList.length = length;
   }
 
-  void operator[]=(int index, Tile value) {
+  void operator []=(int index, Tile value) {
     innerList[index] = value;
   }
   Tile operator [](int index) => innerList[index];
-  
+
   void add(Tile value) => innerList.add(value);
   void addAll(Iterable<Tile> all) => innerList.addAll(all);
 }
