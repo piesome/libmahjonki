@@ -1,6 +1,12 @@
-import '../lib/tile.dart';
+import 'package:libmahjonki/libmahjonki.dart';
 
 void main() {
-  Tile t = new Tile(TileSuite.SOU, TileValue.SU);
-  print(t);
+  Table t = new Table();
+  while(true) {
+    try {
+      print(t.draw());
+    } catch (WallOutOfTilesException) {
+      return;
+    }
+  }
 }

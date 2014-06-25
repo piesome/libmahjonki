@@ -4,20 +4,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import "enum.dart";
-
-/**
- * InvalidTileCombinationException documents itself. An invalid combination of
- * TileSuite and TileValue has been detected.
- */
-class InvalidTileCombinationException implements Exception {
-  final TileSuite suite;
-  final TileValue value;
-  InvalidTileCombinationException(this.suite, this.value);
-  String toString() {
-    return "Invalid TileSuite and TileValue combination $suite $value";
-  }
-}
+part of libmahjonki;
 
 /**
  * Since Dart doesn't have proper enums, this must do for the time
@@ -29,6 +16,13 @@ class TileSuite extends MetaEnum {
   static const MAN = const TileSuite._(2, "manzu");
   static const KAZEHAI = const TileSuite._(3, "kazehai");
   static const SANGENPAI = const TileSuite._(4, "sangenpai");
+  
+  // Aliases for us noobs.
+  static const CIRCLE    = PIN;
+  static const BAMBOO    = SOU;
+  static const CHARACTER = MAN;
+  static const WIND      = KAZEHAI;
+  static const DRAGON    = SANGENPAI;
 
   const TileSuite._(value, name): super(value, name);
 }
@@ -55,6 +49,26 @@ class TileValue extends MetaEnum {
   static const HAKU = const TileValue._(20, "Haku");
   static const HATSU = const TileValue._(21, "Hatsu");
   static const CHUN = const TileValue._(22, "Chun");
+  
+  // Aliases for us noobs.
+  static const ONE   = I;
+  static const TWO   = RYAN;
+  static const THREE = SAN;
+  static const FOUR  = SU;
+  static const FIVE  = U;
+  static const SIX   = RYU;
+  static const SEVEN = CHI;
+  static const EIGHT = PA;
+  static const NINE  = CHU;
+  
+  static const EAST  = TON;
+  static const SOUTH = NAN;
+  static const WEST  = SHA;
+  static const NORTH = PEI;
+  
+  static const WHITE = HAKU;
+  static const GREEN = HATSU;
+  static const RED   = CHUN;
 
   const TileValue._(value, name): super(value, name);
 }
@@ -121,6 +135,10 @@ class Tile {
       }
     }
     return false;
+  }
+  
+  addAttribute(TileAttribute attr) {
+    this.attributes.add(attr);
   }
 
   String toString() {

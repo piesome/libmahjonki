@@ -4,6 +4,8 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+part of libmahjonki;
+
 /**
  * It's kind of like a enum. Kinda.
  */

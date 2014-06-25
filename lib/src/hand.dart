@@ -4,8 +4,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-import 'tile.dart';
-import 'dart:collection';
+part of libmahjonki;
 
 /**
  * Hand wraps a list inside.
