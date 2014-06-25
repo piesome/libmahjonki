@@ -12,7 +12,7 @@ part of libmahjonki;
 class Table {
   List<Tile> wall;
   List<Tile> dead_wall;
-  Tile dora_indicator;
+  List<Tile> dora_indicators;
   
   /**
    * Creates a new table with shuffled wall, dead_wall and dora_indicator.
@@ -20,6 +20,7 @@ class Table {
   Table() {
     wall = [];
     dead_wall = [];
+    dora_indicators = [];
     
     var suites = [TileSuite.CIRCLE, TileSuite.BAMBOO, TileSuite.CHARACTER];
     var values = [TileValue.ONE, TileValue.TWO, TileValue.THREE,
@@ -52,15 +53,24 @@ class Table {
     this.shuffle();
     // Allocate a dead wall
     for (num i = 0; i < 14; i++) {
-      dead_wall.add(wall.removeLast());
+      draw_to_dead_wall();
     }
-    /*
-     * So, for authenticity the dora indicator is the upper tile of the third
-     * last pair of the dead wall. 
-     * 0 | 2 | 4 | 6 |*8*| 10 | 12
-     * 1 | 3 | 5 | 7 | 9 | 11 | 13
-     */
-    dora_indicator = dead_wall[8];
+    
+    add_dora_indicator();
+  }
+  
+  /**
+   * Draw a tile from the wall to the dead wall.
+   */
+  draw_to_dead_wall() {
+    this.dead_wall.add(this.draw());
+  }
+  
+  /**
+   * Unveils a dora indicator from the dead wall.
+   */
+  add_dora_indicator() {
+    Tile dora_indicator = dead_wall.removeLast();
     num dora_value = dora_indicator.value.value + 1;
     // Dora indicator flips
     if (dora_indicator.value == TileValue.NINE) {
@@ -81,6 +91,7 @@ class Table {
         t.addAttribute(TileAttribute.DORA);
       }
     }
+    this.dora_indicators.add(dora_indicator);
   }
   
   /**
@@ -97,7 +108,7 @@ class Table {
     if (this.wall.length == 0) {
       throw new WallOutOfTilesExceptions();
     }
-    return this.wall.removeAt(0);
+    return this.wall.removeLast();
   }
   
   int get length {
