@@ -11,11 +11,9 @@ part of libmahjonki;
 class TileGroupType extends MetaEnum {
   static const ATAMA = const TileGroupType._(0, "atama");
   static const PAIR = ATAMA;
-  static const MENTSU = const TileGroupType._(1, "mentsu");
-  static const GROUP = MENTSU;
-  static const KOUTSU = const TileGroupType._(2, "koutsu");
+  static const KOUTSU = const TileGroupType._(1, "koutsu");
   static const SET = KOUTSU;
-  static const SHUNTSU = const TileGroupType._(3, "shuntsu");
+  static const SHUNTSU = const TileGroupType._(2, "shuntsu");
   static const STRAIGHT = SHUNTSU;
   const TileGroupType._(value, name): super(value, name);
 }
@@ -121,5 +119,40 @@ class HandTileGroup {
       }
     }
     return ret;
+  }
+}
+
+class PartialTileGroup {
+  List<Tile> tiles;
+  PartialTileGroup(Tile tile) {
+    tiles.add(tile);
+  }
+  bool append(Tile tile) {
+    
+    tiles.add(tile);
+    return true;
+  }
+}
+
+class PartialHandTileGroup {
+  List<TileGroup> groups;
+  
+  PartialHandTileGroup(TileGroup pair) {
+    if(pair.type != TileGroupType.ATAMA)
+      throw "Must initialize PartialHandTileGroup with a pair!";
+    this.groups.add(pair);
+  }
+  bool append(TileGroup group) {
+    if(group.type == TileGroupType.ATAMA && this.hasType(TileGroupType.KOUTSU) || this.hasType(TileGroupType.SHUNTSU))
+      return false;
+    groups.add(group);
+    return true;
+  }
+  bool hasType(TileGroupType type) {
+    for(TileGroup group in this.groups) {
+      if(group.type == type)
+        return true;
+    }
+    return false;
   }
 }
