@@ -87,7 +87,7 @@ class TileAttribute extends MetaEnum {
 /**
  * Represents a single tile.
  */
-class Tile {
+class Tile implements Comparable<Tile> {
   final TileSuite suite;
   final TileValue value;
   num sort_index;
@@ -180,4 +180,12 @@ class Tile {
     return this.sort_index <= other.sort_index;
   }
 
+  @override
+  int compareTo(Tile other) {
+    if (this < other)
+      return -1;
+    else if(this > other)
+      return 1;
+    return 0;
+  }
 }
