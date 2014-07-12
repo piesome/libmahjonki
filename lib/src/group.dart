@@ -32,10 +32,10 @@ class TileGroup {
   TileGroup(List<Tile> content) {
     content.sort();
     if(content.length < 2 || content.length > 4)
-      throw "Tried to create a set of invalid length!";
+      throw new ArgumentError("Tried to create a set of invalid length!");
     if(content.length == 2) {
       if(content[0] != content[1])
-        throw "Tried to get an invalid set!";
+        throw new ArgumentError("Tried to get an invalid set!");
       if(content[0].suite == TileSuite.KAZEHAI || content[0].suite == TileSuite.SANGENPAI)
         this.attributes.add(TileGroupAttribute.HONOR);
       else if(content[0].value == 1 || content[0].value == 9)
@@ -44,10 +44,10 @@ class TileGroup {
     }
     else if(content[0] != content[1]) {
       if(content[0] > 7) {
-        throw "Tried to get an invalid set!";
+        throw new ArgumentError("Tried to get an invalid set!");
       }
       if(content[0].value.value +1 != content[1].value.value || content[1].value.value + 1 != content[2].value.value) {
-        throw "Tried to get an invalid set!";
+        throw new ArgumentError("Tried to get an invalid set!");
       }
       if(content[0] == 7)
         this.attributes.add(TileGroupAttribute.TERMINAL);
@@ -59,7 +59,7 @@ class TileGroup {
       bool honor = true;
       for(Tile tile in content) {
         if(t != tile) {
-          throw "Tried to get an invalid set!";
+          throw new ArgumentError("Tried to get an invalid set!");
         }
         if(t.suite != TileSuite.KAZEHAI && t.suite != TileSuite.SANGENPAI) {
           honor = false;
@@ -69,6 +69,7 @@ class TileGroup {
       }
       if(terminal) this.attributes.add(TileGroupAttribute.TERMINAL);
       if(honor) this.attributes.add(TileGroupAttribute.HONOR);
+      this.type = TileGroupType.KOUTSU;
     }
     this.content = content;
   }
@@ -99,7 +100,7 @@ class HandTileGroup {
       }
     }
     if((chiitoitsu && groups.length != 7) || groups.length != 4)
-      throw "Tried to form an invalid hand!";
+      throw new ArgumentError("Tried to form an invalid hand!");
   }
   
   bool hasAttribute(TileGroupAttribute attribute) {
@@ -124,13 +125,93 @@ class HandTileGroup {
 
 class PartialTileGroup {
   List<Tile> tiles;
-  PartialTileGroup(Tile tile) {
-    tiles.add(tile);
+  List<Tile> can_complete;
+  PartialTileGroup();
+  /* return: 0 on partial, -1 on error, 1 on full
+   * not in try-catch for performance reasons
+   * (called tons of times in tight loop) */ 
+  int append(Tile t) {
+    switch (tiles.length){
+      case 0:
+        tiles.add(t);
+        return 0;
+      case 1:
+        if (t.suite != tiles[0].suite) {
+          /* not same suite, invalid set */
+          return -1;
+        }
+        if(t.value == tiles[0]) {
+          tiles.add(t);
+          can_complete.add(t);
+          return 0;
+        }
+        if (t.suite == TileSuite.KAZEHAI || t.suite == TileSuite.SANGENPAI) {
+          /* honor set, not equal */
+          return -1;
+        }
+        int difference = (t.value.value - tiles[0].value.value).abs();
+        if (difference < 3) {
+          tiles.add(t);
+          tiles.sort();
+          int val = tiles[0].value.value;
+          if (difference == 1) {
+            /* okay then, too late to think a good way */
+            if (val == 2)
+              can_complete.add(new Tile(t.suite, TileValue.ONE));
+            if (val == 3)
+              can_complete.add(new Tile(t.suite, TileValue.TWO));
+            if (val == 1 || val == 4)
+              can_complete.add(new Tile(t.suite, TileValue.THREE));
+            else if (val == 2 || val == 5)
+              can_complete.add(new Tile(t.suite, TileValue.FOUR));
+            else if (val == 3 || val == 6)
+              can_complete.add(new Tile(t.suite, TileValue.FIVE));
+            if (val == 4 || val == 7)
+              can_complete.add(new Tile(t.suite, TileValue.SIX));
+            else if (val == 5 || val == 8)
+              can_complete.add(new Tile(t.suite, TileValue.SEVEN));
+            else if (val == 6 || val == 9)
+              can_complete.add(new Tile(t.suite, TileValue.EIGHT));
+            else if (val == 7) /* actually always true at this point */
+              can_complete.add(new Tile(t.suite, TileValue.NINE));
+            return 0;
+          }
+          else {
+            if (val == 1)
+              can_complete.add(new Tile(t.suite, TileValue.TWO));
+            if (val == 2)
+              can_complete.add(new Tile(t.suite, TileValue.THREE));
+            else if (val == 3)
+              can_complete.add(new Tile(t.suite, TileValue.FOUR));
+            else if (val == 4)
+              can_complete.add(new Tile(t.suite, TileValue.FIVE));
+            if (val == 5)
+              can_complete.add(new Tile(t.suite, TileValue.SIX));
+            else if (val == 6)
+              can_complete.add(new Tile(t.suite, TileValue.SEVEN));
+            else if (val == 7)
+              can_complete.add(new Tile(t.suite, TileValue.EIGHT));
+            return 0;
+          }
+        }
+        return -1;
+      case 2:
+        if (can_complete.contains(t)) {
+          tiles.add(t);
+          /* hooray */
+          return 1;
+        }
+        return -1;
+    }
+    throw "Tried to append too much!";
   }
-  bool append(Tile tile) {
-    
-    tiles.add(tile);
-    return true;
+  /* returns true if cannot backtrack */
+  bool backtrack() {
+    if(tiles.length == 0)
+      return true;
+    tiles.removeLast();
+    can_complete.clear();
+    return false;
   }
 }
 
@@ -142,11 +223,14 @@ class PartialHandTileGroup {
       throw "Must initialize PartialHandTileGroup with a pair!";
     this.groups.add(pair);
   }
-  bool append(TileGroup group) {
-    if(group.type == TileGroupType.ATAMA && this.hasType(TileGroupType.KOUTSU) || this.hasType(TileGroupType.SHUNTSU))
-      return false;
+  void add(TileGroup group) {
+    if (groups.length > 1) {
+      if (group.type == TileGroupType.ATAMA && groups[1].type != TileGroupType.ATAMA)
+        throw "Cannot complete a normal hand with a pair!";
+      else if (group.type != TileGroupType.ATAMA && groups[1].type == TileGroupType.ATAMA)
+        throw "Cannot complete a chiitoi with a normal group!";
+    }
     groups.add(group);
-    return true;
   }
   bool hasType(TileGroupType type) {
     for(TileGroup group in this.groups) {
