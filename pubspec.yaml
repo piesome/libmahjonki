@@ -1,4 +1,5 @@
 name: libmahjonki
 description: riichi mahjong data structures
 dependencies:
+  libmahjonki: any
   unittest: any

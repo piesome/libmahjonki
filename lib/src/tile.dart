@@ -6,6 +6,61 @@
 
 part of libmahjonki;
 
+/* Build a tile from a two-character string:
+ * Pin=P, Sou=S, Man=M, Dragon=D, Wind=W,
+ * Red,Green,White=RGW, East,South,West,North=ESWN,
+ * example: P1 = Pin 1, DW = White Dragon */
+Tile get_tile(String str) {
+  TileSuite suite;
+  TileValue value;
+  switch(str[0]) {
+ }
+  value = string_to_tilevalue(str[1]);
+}
+
+TileSuite string_to_tilesuite(String str) {
+  switch(str) {
+    case "P":
+      return TileSuite.PIN;
+    case "S":
+      return TileSuite.SOU;
+    case "M":
+      return TileSuite.MAN;
+    case "J":
+      return TileSuite.JIHAI;
+    default:
+      throw new ArgumentError("Invalid value for converting suite to tilesuite (" + str + ")");
+  }
+}
+
+TileValue string_to_tilevalue(String str) {
+  switch(str) {
+    case "1":
+      return TileValue.ONE;
+    case "2":
+      return TileValue.TWO;
+    case "3":
+      return TileValue.THREE;
+    case "4":
+      return TileValue.FOUR;
+    case "5":
+      return TileValue.FIVE;
+    case "6":
+      return TileValue.SIX;
+    case "7":
+      return TileValue.SEVEN;
+    case "8":
+      return TileValue.EIGHT;
+    case "9":
+      return TileValue.NINE;
+    case "":
+      return TileValue.NINE;
+    default:
+      throw new ArgumentError("Invalid value for converting number to tilevalue (" + str + ")");
+  }
+}
+
+
 /**
  * Since Dart doesn't have proper enums, this must do for the time
  * being.
@@ -14,15 +69,13 @@ class TileSuite extends MetaEnum {
   static const PIN = const TileSuite._(0, "pinzu");
   static const SOU = const TileSuite._(1, "sōzu");
   static const MAN = const TileSuite._(2, "manzu");
-  static const KAZEHAI = const TileSuite._(3, "kazehai");
-  static const SANGENPAI = const TileSuite._(4, "sangenpai");
+  static const JIHAI = const TileSuite._(3, "jihai");
   
   // Aliases for us noobs.
   static const CIRCLE    = PIN;
   static const BAMBOO    = SOU;
   static const CHARACTER = MAN;
-  static const WIND      = KAZEHAI;
-  static const DRAGON    = SANGENPAI;
+  static const HONOR     = JIHAI;
 
   const TileSuite._(value, name): super(value, name);
 }
@@ -98,12 +151,8 @@ class Tile implements Comparable<Tile> {
       if (this.value < TileValue.I || this.value > TileValue.CHU) {
         throw new InvalidTileCombinationException(this.suite, this.value);
       }
-    } else if (this.suite == TileSuite.KAZEHAI) {
-      if (this.value < TileValue.TON || this.value > TileValue.PEI) {
-        throw new InvalidTileCombinationException(this.suite, this.value);
-      }
-    } else if (this.suite == TileSuite.SANGENPAI) {
-      if (this.value < TileValue.HAKU || this.value > TileValue.CHUN) {
+    } else if (this.suite == TileSuite.JIHAI) {
+      if (this.value < TileValue.TON || this.value > TileValue.CHUN) {
         throw new InvalidTileCombinationException(this.suite, this.value);
       }
     }

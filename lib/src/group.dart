@@ -20,6 +20,7 @@ class TileGroupType extends MetaEnum {
 class TileGroupAttribute extends MetaEnum {
   static const TERMINAL = const TileGroupAttribute ._(0, "terminal");
   static const HONOR = const TileGroupAttribute ._(1, "honor");
+  static const YAOCHUUHAI = const TileGroupAttribute ._(2, "")
   
   const TileGroupAttribute ._(value, name): super(value, name);
 }
@@ -31,14 +32,17 @@ class TileGroup {
   
   TileGroup(List<Tile> content) {
     content.sort();
+    attributes = new List<TileGroupAttribute>();
     if(content.length < 2 || content.length > 4)
       throw new ArgumentError("Tried to create a set of invalid length!");
     if(content.length == 2) {
       if(content[0] != content[1])
         throw new ArgumentError("Tried to get an invalid set!");
-      if(content[0].suite == TileSuite.KAZEHAI || content[0].suite == TileSuite.SANGENPAI)
+      if(content[0].suite == TileSuite.JIHAI) {
         this.attributes.add(TileGroupAttribute.HONOR);
-      else if(content[0].value == 1 || content[0].value == 9)
+        this.attributes.add(TileGroupAttribute.TERMINAL);
+      }
+      else if(content[0].value.value == 1 || content[0].value.value == 9)
         this.attributes.add(TileGroupAttribute.TERMINAL);
       this.type = TileGroupType.ATAMA;
     }
@@ -49,7 +53,7 @@ class TileGroup {
       if(content[0].value.value +1 != content[1].value.value || content[1].value.value + 1 != content[2].value.value) {
         throw new ArgumentError("Tried to get an invalid set!");
       }
-      if(content[0] == 7)
+      if(content[0].value.value == 1 || content[0].value.value == 7)
         this.attributes.add(TileGroupAttribute.TERMINAL);
       this.type = TileGroupType.SHUNTSU;
     }
@@ -61,7 +65,7 @@ class TileGroup {
         if(t != tile) {
           throw new ArgumentError("Tried to get an invalid set!");
         }
-        if(t.suite != TileSuite.KAZEHAI && t.suite != TileSuite.SANGENPAI) {
+        if(t.suite != TileSuite.JIHAI) {
           honor = false;
           if(t.value != 1 && t.value != 9)
             terminal = false;
@@ -126,11 +130,14 @@ class HandTileGroup {
 class PartialTileGroup {
   List<Tile> tiles;
   List<Tile> can_complete;
-  PartialTileGroup();
+  PartialTileGroup() {
+    tiles = new List<Tile>();
+    can_complete = new List<Tile>();
+  }
   /* return: 0 on partial, -1 on error, 1 on full
    * not in try-catch for performance reasons
    * (called tons of times in tight loop) */ 
-  int append(Tile t) {
+  int add(Tile t) {
     switch (tiles.length){
       case 0:
         tiles.add(t);
@@ -145,7 +152,7 @@ class PartialTileGroup {
           can_complete.add(t);
           return 0;
         }
-        if (t.suite == TileSuite.KAZEHAI || t.suite == TileSuite.SANGENPAI) {
+        if (t.suite == TileSuite.JIHAI) {
           /* honor set, not equal */
           return -1;
         }
@@ -219,6 +226,7 @@ class PartialHandTileGroup {
   List<TileGroup> groups;
   
   PartialHandTileGroup(TileGroup pair) {
+    groups = new List<TileGroup>();
     if(pair.type != TileGroupType.ATAMA)
       throw "Must initialize PartialHandTileGroup with a pair!";
     this.groups.add(pair);
